@@ -23,7 +23,7 @@ Returns the extended param.
 
 ### param.transform(func)
 
-Returns an instances of AudioParamTransform which works the same as the base AudioParam, except applying the specified `func(a, b)` to all values, ramps and curves.
+Returns an instance of AudioParamTransform applied to the target AudioParam which works the same as the base AudioParam, except applying the specified `func(a, b)` to all values, ramps and curves.
 
 If you do not specify a function, the specified value for this transform will override all previous transforms (if any).
 
@@ -61,9 +61,9 @@ var transposeParam = oscillator.frequency.transform(transpose)
 var on = false
 setInterval(function(){
   if (on){ // ramp up
-    transposeParam.linearRampToValueAtTime(12, audioContex.currentTime + 0.3)
+    transposeParam.linearRampToValueAtTime(12, audioContext.currentTime + 0.3)
   } else { // and back again
-    transposeParam.linearRampToValueAtTime(0, audioContex.currentTime + 0.3)
+    transposeParam.linearRampToValueAtTime(0, audioContext.currentTime + 0.3)
   }
   on = !on
 }, 1000)
@@ -71,3 +71,4 @@ setInterval(function(){
 function transpose(a,b){
   return a * Math.pow(2, (b || 0) / 12)
 }
+```
