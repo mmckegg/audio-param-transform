@@ -1,0 +1,35 @@
+{
+  "name": "audio-param-transform",
+  "version": "0.0.0",
+  "description": "Apply multiple transforms with custom functions to Web Audio API AudioParams.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mmckegg/audio-param-transform.git"
+  },
+  "keywords": [
+    "AudioParam",
+    "modulate",
+    "lfo",
+    "transform",
+    "Web",
+    "Audio",
+    "API",
+    "offset",
+    "transpose",
+    "setValueCurveAtTime",
+    "AudioNode"
+  ],
+  "author": "Matt McKegg",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mmckegg/audio-param-transform/issues"
+  },
+  "homepage": "https://github.com/mmckegg/audio-param-transform"
+}
