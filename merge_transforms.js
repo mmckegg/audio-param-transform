@@ -3,7 +3,8 @@ module.exports = mergeTransforms
 function mergeTransforms(transforms, from, to, step){
 
   var duration = to - from
-  var steps = (duration || 1) / (step || 1)
+  var steps = step ? duration / step : 1
+
   var transformCount = transforms.length
   var result = new Float32Array(steps)
 
@@ -45,10 +46,9 @@ function mergeTransforms(transforms, from, to, step){
 
 function consolidate(startValue, events, from, to, step){
 
-  var duration = (to - from) || 1
-  step = step || duration
+  var duration = to - from
 
-  var steps = duration / step
+  var steps = step ? duration / step : 1
   var curve = new Float32Array(steps)
 
   var start = 0
@@ -60,12 +60,11 @@ function consolidate(startValue, events, from, to, step){
     for (var i=0;i<events.length;i++){
 
       var event = events[i]
-      var eventStep = event.step || duration
 
-      var offset = Math.floor((event.from - from) / step)
-      var scale = eventStep / step
+      var offset = step ? Math.floor((event.from - from) / step) : 0
+      var scale = (event.step && step) ? event.step / step : 1
 
-      var newLength = Math.floor(event.curve.length * scale)
+      var newLength = Math.floor(steps * scale)
 
       if (offset > start){
         start = offset
@@ -76,16 +75,19 @@ function consolidate(startValue, events, from, to, step){
         lastValue = event.curve[event.curve.length-1]
       }
 
-      if (eventStep === step && offset>=0){
+      if (event.step === step && offset>=0 && event.curve.length + offset <= curve.length){
         curve.set(event.curve, offset)
       } else { // rescale if step doesn't match
         for (var x=0,l=newLength;x<l;x++){
+          var pos = x+Math.max(0, offset)
           var xi = Math.floor(x / scale) - Math.min(0, offset)
-          curve[x+Math.max(0, offset)] = event.curve[xi]
+          curve[pos] = event.curve[xi]
         }
       }
     }
   }
+
+
 
   // fill remaining
   for (var i=0;i<start;i++){

@@ -70,10 +70,9 @@ function doSchedule(){ // bound to AudioParam
       this.cancelScheduledValues(from)
       if (result.length === 1){
         this.setValueAtTime(result[0], from)
-      } else {
+      } else if (result.length > 1) {
         this.setValueCurveAtTime(result, from, to-from)
       }
-
     }
 
     this._pendingTransforms = 0
