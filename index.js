@@ -44,7 +44,7 @@ function doSchedule(){ // bound to AudioParam
     var transforms = []
     var from = Infinity
     var to = 0
-    var step = Infinity
+    var step = 0
 
     // set from / to
     for (var i=0;i<this._transforms.length;i++){
@@ -58,7 +58,7 @@ function doSchedule(){ // bound to AudioParam
         if (to < event.to){
           to = event.to
         }
-        if (!step || step > event.step){
+        if (event.step && (!step || step > event.step)){
           step = event.step
         }
       }
