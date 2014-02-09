@@ -126,6 +126,10 @@ var proto = {
       value: curve[curve.length-1]
     })
   },
+  setTargetAtTime: function(targetValue, at, timeConstant){
+    console.warn('setTargetAtTime not implemented on audio-param-transform, passing through')
+    this.param.setTargetAtTime(targetValue, at, timeConstant)
+  },
   cancelScheduledValues: function(startTime){
     schedule(this, {cancel: true, at: startTime || this.param.context.currentTime})
   },
