@@ -208,7 +208,13 @@ function schedule(transform, event){
 
   transform._state.events.push(event)
   transform.param._pendingTransforms += 1
-  process.nextTick(transform.param._doSchedule)
+
+  if (event.from <= transform.param.context.currentTime + 0.001){
+    transform.param._doSchedule()
+  } else {
+    // attempt to batch the transform
+    process.nextTick(transform.param._doSchedule)
+  }
 }
 
 function getCurve(startValue, targetValue, steps, curve){
