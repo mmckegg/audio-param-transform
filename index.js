@@ -127,7 +127,7 @@ var proto = {
     })
   },
   setTargetAtTime: function(targetValue, at, timeConstant){
-    console.warn('setTargetAtTime not implemented on audio-param-transform, passing through')
+    //console.warn('setTargetAtTime not implemented on audio-param-transform, passing through')
     this.param.setTargetAtTime(targetValue, at, timeConstant)
   },
   cancelScheduledValues: function(startTime){
