@@ -26,7 +26,9 @@ function transform(operation, defaultValue){ // bound to AudioParam
         return paramTransform.getValueAt(null)
       },
       set: function(value){
-        paramTransform.setValueAtTime(value, 0)
+        if (paramTransform.getValueAt(null) !== value){
+          paramTransform.setValueAtTime(value, 0)
+        }
       }
     }
   })
