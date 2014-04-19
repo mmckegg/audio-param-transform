@@ -94,7 +94,7 @@ var proto = {
 
     var startValue = this.getValueAt(startTime)
     var duration = endTime - startTime
-    var steps =  this.param.context.sampleRate / duration
+    var steps = duration ? (this.param.context.sampleRate / duration) : 1
 
     schedule(this, {
       curve: getCurve(startValue, value, steps, curves.linear), 
