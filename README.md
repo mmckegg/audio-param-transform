@@ -21,23 +21,23 @@ Pass in the AudioParam you wish to add a `transform()` method to and the relevan
 
 Returns the extended param.
 
-### param.transform(func)
+### param.transform(func, defaultValue)
 
-Returns an instance of AudioParamTransform applied to the target AudioParam which works the same as the base AudioParam, except applying the specified `func(a, b)` to all values, ramps and curves.
+Returns an instance of TransformAudioParam applied to the target AudioParam which works the same as the base AudioParam, except applying the specified `func(a, b)` to all values, ramps and curves.
 
 If you do not specify a function, the specified value for this transform will override all previous transforms (if any).
 
-### AudioParamTransform#setValueAtTime(value, at)
+### TransformAudioParam#setValueAtTime(value, at)
 
-### AudioParamTransform#linearRampToValueAtTime(value, endTime)
+### TransformAudioParam#linearRampToValueAtTime(value, endTime)
 
-### AudioParamTransform#exponentialRampToValueAtTime(value, endTime)
+### TransformAudioParam#exponentialRampToValueAtTime(value, endTime)
 
-### AudioParamTransform#setValueCurveAtTime(float32ArrayCurve, at, duration)
+### TransformAudioParam#setValueCurveAtTime(float32ArrayCurve, at, duration)
 
-### AudioParamTransform#cancelScheduledValues(from)
+### TransformAudioParam#cancelScheduledValues(from)
 
-### AudioParamTransform#getValueAt(time)
+### TransformAudioParam#getValueAt(time)
 
 ## Example
 
