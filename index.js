@@ -6,10 +6,16 @@ module.exports = function extend(param, audioContext){
     param._transforms = []
     param.context = audioContext
     param.transform = transform
+    param.clearTransforms = clearTransforms
     param.scheduler = Scheduler(param.context, Math.pow(2,10), doSchedule.bind(param))
     param._transformCallback = param.scheduler.scheduleRange.bind(param.scheduler)
   }
   return param
+}
+
+function clearTransforms(){
+  var param = this
+  this._transforms = []
 }
 
 function transform(operation, defaultValue){ // bound to AudioParam
@@ -24,10 +30,16 @@ function transform(operation, defaultValue){ // bound to AudioParam
     defaultValue = param.defaultValue
   }
 
-  var transform = TransformParam(this.context, defaultValue, param._transformCallback)
-  transform.operation = operation
-  param._transforms.push(transform)
-  return transform
+  var transformParam = TransformParam(this.context, defaultValue, param._transformCallback)
+  transformParam.operation = operation
+  transformParam._transforms = []
+
+  transformParam.transform = transform
+  transformParam.clearTransforms = clearTransforms
+  transformParam._transformCallback = param._transformCallback
+
+  param._transforms.push(transformParam)
+  return transformParam
 }
 
 function doSchedule(from, to){
@@ -39,16 +51,17 @@ function doSchedule(from, to){
   var curve = new Float32Array(steps)
 
   var curves = []
+  var transforms = getTransforms(param)
 
-  for (var i=0;i<param._transforms.length;i++){
-    var transform = param._transforms[i]
+  for (var i=0;i<transforms.length;i++){
+    var transform = transforms[i]
     curves[i] = transform.generateCurveRange(from, to)
   }
 
   for (var i=0;i<steps;i++){
     var value = defaultValue
-    for (var x=0;x<param._transforms.length;x++){
-      var transform = param._transforms[x]
+    for (var x=0;x<transforms.length;x++){
+      var transform = transforms[x]
       if (transform.operation){
         value = transform.operation(value, curves[x][i])
       } else {
@@ -63,4 +76,17 @@ function doSchedule(from, to){
   } else if (steps > 1) {
     param.setValueCurveAtTime(curve, from, duration)
   }
+}
+
+function getTransforms(param, target){
+  target = target || []
+
+  if (Array.isArray(param._transforms)){
+    for (var i=0;i<param._transforms.length;i++){
+      target.push(param._transforms[i])
+      getTransforms(param._transforms[i], target)
+    }
+  }
+
+  return target
 }
