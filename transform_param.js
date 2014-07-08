@@ -147,7 +147,7 @@ function interpolate(start, target, pos){
   } else if (target.type === 'exponentialRamp'){
     return start + range * Math.pow(pos, 2)
   } else if (target.type === 'valueCurve'){
-    return target.value[Math.floor(pos * target.length)]
+    return target.value[Math.min(Math.floor(pos * target.value.length), target.value.length-1)]
   } else if (target.type === 'target'){
     return start + range * expFalloff(pos, target.timeConstant)
   }
