@@ -46,7 +46,7 @@ Creating a transpose param.
 ```js
 var extendTransform = require('audio-param-transform')
 
-var audioContext = new webkitAudioContext()
+var audioContext = new AudioContext()
 var oscillator = audioContext.createOscillator()
 oscillator.connect(audioContext.destination)
 

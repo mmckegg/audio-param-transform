@@ -1,4 +1,4 @@
-var audioContext = new webkitAudioContext()
+var audioContext = new AudioContext()
 
 var extend = require('./index')
 
