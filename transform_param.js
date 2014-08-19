@@ -1,15 +1,18 @@
-module.exports = function TransformAudioParam(audioContext, defaultValue, cb){
-  var instance = Object.create(proto, properties)
-  instance.context = audioContext
-  instance._callback = cb
+module.exports = TransformAudioParam
 
-  instance._events = []
-  instance._events.truncateFrom = truncateFrom
-  instance._events.truncateTo = truncateTo
-  instance.defaultValue = defaultValue
-  instance._lastValue = defaultValue
-
-  return instance
+function TransformAudioParam(audioContext, defaultValue, cb){
+  if (!(this instanceof TransformAudioParam)){
+    return new TransformAudioParam(audioContext, defaultValue, cb)
+  }
+  Object.defineProperties(this, properties)
+  this.context = audioContext
+  this._callback = cb
+  this._events = []
+  this._events.truncateFrom = truncateFrom
+  this._events.truncateTo = truncateTo
+  this.defaultValue = defaultValue
+  this._lastValue = defaultValue
+  this._sampleRate = audioContext.sampleRate
 }
 
 var properties = {
@@ -23,7 +26,9 @@ var properties = {
   }
 }
 
-var proto = {
+TransformAudioParam.prototype = {
+  constructor: TransformAudioParam,
+
   setValueAtTime: function(value, at){
     this.addEvent({
       at: at,
@@ -102,8 +107,8 @@ var proto = {
 
   generateCurveRange: function(fromTime, toTime){
     var duration = toTime - fromTime
-    var steps = Math.max(1, Math.floor(duration * this.context.sampleRate))
     var curve = new Float32Array(steps)
+    var steps = Math.max(1, Math.floor(duration * this._sampleRate))
 
     for (var i=0;i<steps;i++){
       var time = fromTime + duration * (i / steps)
@@ -123,7 +128,7 @@ var proto = {
         var pos = (time - target.from) / duration
         return interpolate(lastValue||0, target, pos)
       } else if (target.at <= time){
-        if (target.value instanceof Float32Array){
+        if (typeof target.value == 'object'){
           lastValue = target.value[target.value.length-1]
         } else {
           lastValue = target.value
