@@ -4,6 +4,7 @@ module.exports = function TransformAudioParam(audioContext, defaultValue, cb){
   instance._callback = cb
 
   instance._events = []
+  instance._sampleRate = audioContext.sampleRate
   instance._events.truncateFrom = truncateFrom
   instance._events.truncateTo = truncateTo
   instance.defaultValue = defaultValue
@@ -102,7 +103,7 @@ var proto = {
 
   generateCurveRange: function(fromTime, toTime){
     var duration = toTime - fromTime
-    var steps = Math.max(1, Math.floor(duration * this.context.sampleRate))
+    var steps = Math.max(1, Math.floor(duration * this._sampleRate))
     var curve = new Float32Array(steps)
 
     for (var i=0;i<steps;i++){
