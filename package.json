@@ -1,6 +1,6 @@
 {
   "name": "audio-param-transform",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "Apply multiple transforms with custom functions to Web Audio API AudioParams.",
   "main": "index.js",
   "directories": {
