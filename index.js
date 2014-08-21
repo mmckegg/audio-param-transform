@@ -5,7 +5,6 @@ module.exports = function extend(param, audioContext){
   if (!param.transform){
     param._transforms = []
     param.context = audioContext
-    param._sampleRate = audioContext.sampleRate
     param.transform = transform
     param.clearTransforms = clearTransforms
     param.scheduler = Scheduler(param.context, Math.pow(2,10), doSchedule.bind(param))
@@ -31,7 +30,7 @@ function transform(operation, defaultValue){ // bound to AudioParam
     defaultValue = param.defaultValue
   }
 
-  var transformParam = new TransformParam(this.context, defaultValue, param._transformCallback)
+  var transformParam = TransformParam(this.context, defaultValue, param._transformCallback)
   transformParam.operation = operation
   transformParam._transforms = []
 
@@ -46,7 +45,7 @@ function transform(operation, defaultValue){ // bound to AudioParam
 function doSchedule(from, to){
   var param = this
   var duration = to - from
-  var steps = Math.max(1, Math.floor(duration * param._sampleRate))
+  var steps = Math.max(1, Math.floor(duration * param.context.sampleRate))
   var defaultValue = param.defaultValue
 
   var curve = new Float32Array(steps)
