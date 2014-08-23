@@ -154,6 +154,8 @@ function interpolate(start, target, pos){
   }
 }
 
+module.exports.interpolate = interpolate
+
 function truncateFrom(time){
   for (var i=0; i<this.length; i++){
     if (this[i].at >= time){
