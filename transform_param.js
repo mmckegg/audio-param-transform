@@ -1,30 +1,112 @@
-module.exports = function TransformAudioParam(audioContext, defaultValue, cb){
-  var instance = Object.create(proto, properties)
-  instance.context = audioContext
-  instance._callback = cb
+/**
+ * TransformAudioParam (TAP) constructor
+ * @param {AudioContext}  audioContext
+ * @param {???}           defaultValue
+ * @param {Function}      callback
+ */
+function TAP( audioContext, defaultValue, callback ) {
+  
+  if( !(this instanceof TAP) )
+    return new TAP( audioContext, defaultValue, callback )
+  
+  this.context = audioContext
+  this._callback = callback
 
-  instance._events = []
-  instance._sampleRate = audioContext.sampleRate
-  instance._events.truncateFrom = truncateFrom
-  instance._events.truncateTo = truncateTo
-  instance.defaultValue = defaultValue
-  instance._lastValue = defaultValue
-
-  return instance
+  this._events = []
+  this._sampleRate = audioContext.sampleRate
+  this._events.truncateFrom = TAP.truncateFrom
+  this._events.truncateTo = TAP.truncateTo
+  this.defaultValue = defaultValue
+  this._lastValue = defaultValue
+  
 }
 
-var properties = {
-  value: {
-    get: function(){
-      this.getValueAt(this.context.currentTime)
-    },
-    set: function(value){
-      this.setValueAtTime(value, this.context.currentTime)
+/**
+ * Interpolation functions
+ * @type {Object}
+ */
+TAP.interpolation = {
+  
+  linearRamp: function( start, target, pos ) {
+    var range = target.value - start
+    return start + range * pos
+  },
+  
+  exponentialRamp: function( start, target, pos ) {
+    var range = target.value - start
+    return start + range * Math.pow( pos, 2 )
+  },
+  
+  valueCurve: function( start, target, pos ) {
+    var index = ( pos * target.value.length ) | 0
+        index = Math.min( index, target.value.length - 1 )
+    return target.value[ index ]
+  },
+  
+  target: function( start, target, pos ) {
+    var range = target.value - start
+    return start + range * TAP.expFalloff( pos, target.timeConstant )
+  },
+  
+}
+
+/**
+ * Interpolation selector
+ * @param  {Number} start
+ * @param  {Object} target
+ * @param  {Number} pos
+ * @return {Number}
+ */
+TAP.interpolate = function( start, target, pos ) {
+  return TAP.interpolation[ target.type ]( start, target, pos )
+}
+
+TAP.truncateFrom = function( time ) {
+  for (var i=0; i<this.length; i++){
+    if (this[i].at >= time){
+      this.splice(i, this.length-i)
+      return true
     }
   }
 }
 
-var proto = {
+TAP.truncateTo = function( time ) {
+  for (var i=this.length-1; i>=0; i--){
+    if (this[i].at <= time){
+      this.splice(0, i+1)
+      return true
+    }
+  }
+}
+
+TAP.expFalloff = function( pos, t ) {
+  var factor = 1000
+  return (
+    Math.log( 1 + pos * ( t * factor ) ) /
+      Math.log( 1 + ( t * factor ) )
+  )
+}
+
+TAP.falloffTime = function( t ) {
+  return t * 8
+}
+
+/**
+ * TAP prototype
+ * @type {Object}
+ */
+TAP.prototype = {
+  
+  constructor: TAP,
+  
+  get value() {
+    this.getValueAt( this.context.currentTime )
+  },
+  
+  set value( value ) {
+    this.setValueAtTime( value, this.context.currentTime )
+  },
+  
   setValueAtTime: function(value, at){
     this.addEvent({
       at: at,
@@ -32,6 +114,7 @@ var proto = {
       type: 'set'
     })
   },
+  
   linearRampToValueAtTime: function(value, endTime){
     this.addEvent({
       from: this.context.currentTime,
@@ -40,6 +123,7 @@ var proto = {
       type: 'linearRamp'
     })
   },
+  
   exponentialRampToValueAtTime: function(value, endTime){
     this.addEvent({
       from: this.context.currentTime,
@@ -48,6 +132,7 @@ var proto = {
       type: 'exponentialRamp'
     })
   },
+  
   setValueCurveAtTime: function(curve, at, duration){
     this.addEvent({
       from: at,
@@ -56,15 +141,17 @@ var proto = {
       type: 'valueCurve'
     })
   },
+  
   setTargetAtTime: function(targetValue, at, timeConstant){
     this.addEvent({
       timeConstant: timeConstant,
-      at: at + falloffTime(timeConstant), 
+      at: at + TAP.falloffTime(timeConstant), 
       from: at,
       value: targetValue,
       type: 'target'
     })
   },
+  
   cancelScheduledValues: function(startTime){
 
     this._events.truncateFrom(startTime)
@@ -74,11 +161,12 @@ var proto = {
     // truncate scheduled curves
     // truncate targets
   },
+  
   popEventsTo: function(toTime){
     this._lastValue = this.getValueAt(toTime)
     this._events.truncateTo(toTime)
   },
-
+  
   addEvent: function(event){
     for (var i=0;i<this._events.length;i++){
       var curr = this._events[i]
@@ -122,7 +210,7 @@ var proto = {
       if (target.from && target.from <= time && target.at >= time){
         var duration = target.at - target.from
         var pos = (time - target.from) / duration
-        return interpolate(lastValue||0, target, pos)
+        return TAP.interpolate(lastValue||0, target, pos)
       } else if (target.at <= time){
         if (target.value instanceof Float32Array){
           lastValue = target.value[target.value.length-1]
@@ -137,47 +225,9 @@ var proto = {
     }
 
     return lastValue
-  }
+  },
+  
 }
 
-function interpolate(start, target, pos){
-  var range = target.value - start
-
-  if (target.type === 'linearRamp'){
-    return start + range * pos
-  } else if (target.type === 'exponentialRamp'){
-    return start + range * Math.pow(pos, 2)
-  } else if (target.type === 'valueCurve'){
-    return target.value[Math.min(Math.floor(pos * target.value.length), target.value.length-1)]
-  } else if (target.type === 'target'){
-    return start + range * expFalloff(pos, target.timeConstant)
-  }
-}
-
-function truncateFrom(time){
-  for (var i=0; i<this.length; i++){
-    if (this[i].at >= time){
-      this.splice(i, this.length-i)
-      return true
-    }
-  }
-}
-
-function truncateTo(time){
-  for (var i=this.length-1; i>=0; i--){
-    if (this[i].at <= time){
-      this.splice(0, i+1)
-      return true
-    }
-  }
-}
-
-// this stuff needs improving to match the API better
-function expFalloff(pos, t){
-  var multiplier = 1000
-  return Math.log(1+pos*(t*multiplier)) / Math.log(1+(t*multiplier))
-}
-function falloffTime(t){
-  return t*8
-}
-
+// Exports
+module.exports = TAP
